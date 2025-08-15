@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        .button:hover { background: #0056b3; }
+        .button.danger { background: #dc3545; }
+        .button.danger:hover { background: #c82333; }
+        input, select { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; white-space: pre-wrap; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>User Management Test Client</h1>
+    
+    <div class="section">
+        <h3>1. List All Users</h3>
+        <button class="button" onclick="loadUsers()">Load Users</button>
+        <div id="usersResult" class="result"></div>
+        <div id="usersTable"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. Add New User</h3>
+        <div>
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <input type="text" id="fullName" placeholder="Full Name" required>
+            <select id="role">
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <button class="button" onclick="addUser()">Add User</button>
+        </div>
+        <div id="addResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. Delete User</h3>
+        <div>
+            <input type="number" id="deleteId" placeholder="User ID" required>
+            <button class="button danger" onclick="deleteUser()">Delete User</button>
+        </div>
+        <div id="deleteResult" class="result"></div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost:3002';
+        
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${BASE_URL}/test-users`);
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('usersResult');
+                const tableDiv = document.getElementById('usersTable');
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `Found ${data.count} users`;
+                    
+                    // Create table
+                    let tableHTML = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.users.forEach(user => {
+                        tableHTML += `
+                            <tr>
+                                <td>${user.Id}</td>
+                                <td>${user.Username}</td>
+                                <td>${user.FullName}</td>
+                                <td>${user.Role}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    tableDiv.innerHTML = tableHTML;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = 'Failed to load users';
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('usersResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function addUser() {
+            try {
+                const userData = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    fullName: document.getElementById('fullName').value,
+                    role: document.getElementById('role').value
+                };
+                
+                if (!userData.username || !userData.password || !userData.fullName) {
+                    throw new Error('All fields are required');
+                }
+                
+                const response = await fetch(`${BASE_URL}/test-add-user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('addResult');
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `User added successfully!\nID: ${data.user.Id}\nUsername: ${data.user.Username}`;
+                    
+                    // Clear form
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                    document.getElementById('fullName').value = '';
+                    document.getElementById('role').value = 'User';
+                    
+                    // Reload users
+                    loadUsers();
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('addResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function deleteUser() {
+            try {
+                const userId = document.getElementById('deleteId').value;
+                
+                if (!userId) {
+                    throw new Error('User ID is required');
+                }
+                
+                const response = await fetch(`${BASE_URL}/test-delete-user/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('deleteResult');
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `User deleted successfully!\nRows affected: ${data.rowsAffected}`;
+                    
+                    // Clear form
+                    document.getElementById('deleteId').value = '';
+                    
+                    // Reload users
+                    loadUsers();
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `Error: ${data.error}`;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('deleteResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Load users on page load
+        window.onload = function() {
+            loadUsers();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Comment API</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Test Comment Workflow</h1>
+    
+    <div>
+        <h2>1. Check Session</h2>
+        <button onclick="checkSession()">Check Session</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div>
+        <h2>2. Login (if needed)</h2>
+        <input type="text" id="username" placeholder="Username" value="admin">
+        <input type="password" id="password" placeholder="Password" value="admin123">
+        <button onclick="login()">Login</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div>
+        <h2>3. Test Comment</h2>
+        <input type="text" id="testComment" placeholder="Test comment" value="Test comment from debug page">
+        <button onclick="testComment()">Submit Comment to Draft 21</button>
+        <div id="commentResult"></div>
+    </div>
+
+    <script>
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/drafts/test-session');
+                const result = await response.json();
+                document.getElementById('sessionResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('sessionResult').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        async function login() {
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+                const result = await response.json();
+                document.getElementById('loginResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('loginResult').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testComment() {
+            try {
+                const response = await fetch('/api/drafts/21/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        comment: document.getElementById('testComment').value
+                    })
+                });
+                const result = await response.json();
+                document.getElementById('commentResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('commentResult').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

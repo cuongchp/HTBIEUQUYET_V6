@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <!-- PWA and Mobile Optimization -->
+    <meta name="theme-color" content="#2E5BBA">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EVNCHP Voting">
+    
+    <title>Hệ thống Biểu quyết - EVNCHP</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style">
+    
+    <!-- CSS Resources -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    
+    <!-- Custom CSS to hide specific header -->
+    <style>
+        /* Hide the "Danh sách dự thảo đang mở góp ý" header */
+        #active-drafts .card-header {
+            display: none !important;
+        }
+        
+        /* Adjust the card body styling */
+        #active-drafts .card .card-body {
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+        
+        /* Toast notification animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div class="card shadow-lg login-card">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-1">
+                    <i class="fas fa-vote-yea me-2"></i>
+                    <span class="d-none d-sm-inline">HỆ THỐNG BIỂU QUYẾT</span>
+                    <span class="d-sm-none">BIỂU QUYẾT</span>
+                </h4>
+                <h6 class="mb-0">EVNCHP</h6>
+            </div>
+            <div class="card-body p-3 p-sm-4">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Tên đăng nhập</label>
+                        <input type="text" class="form-control form-control-lg" id="username" required 
+                               autocomplete="username" inputmode="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mật khẩu</label>
+                        <input type="password" class="form-control form-control-lg" id="password" required 
+                               autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                    </button>
+                </form>
+                <div id="loginError" class="alert alert-danger mt-3 d-none" role="alert"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="d-none">
+        <!-- Enhanced Header -->
+        <header class="main-header">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <!-- Brand with responsive text -->
+                    <a class="navbar-brand d-flex align-items-center" href="#" onclick="showModule('dashboard')">
+                        <i class="fas fa-vote-yea me-2 me-sm-3"></i>
+                        <div>
+                            <div class="brand-title">
+                                <span class="d-none d-md-inline">HỆ THỐNG BIỂU QUYẾT - EVNCHP</span>
+                                <span class="d-md-none">BIỂU QUYẾT EVNCHP</span>
+                            </div>
+                            <small class="brand-subtitle d-none d-sm-block">Electronic Voting Management System</small>
+                        </div>
+                    </a>
+                    
+                    <!-- Mobile menu toggle -->
+                    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#headerNavbar" aria-controls="headerNavbar" aria-expanded="false" 
+                            aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    
+                    <!-- Header navigation - collapsible on mobile -->
+                    <div class="collapse navbar-collapse" id="headerNavbar">
+                        <div class="navbar-nav ms-auto d-flex align-items-center">
+                            <!-- Current date - hidden on small screens -->
+                            <div class="nav-item me-3 d-none d-md-block">
+                                <span id="currentDate" class="small"></span>
+                            </div>
+                            
+                            <!-- User dropdown -->
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" 
+                                   id="userDropdown" role="button" data-bs-toggle="dropdown" 
+                                   aria-expanded="false">
+                                    <div class="user-avatar me-2" id="userAvatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="user-info d-none d-sm-block">
+                                        <div class="user-name" id="userName">Tên người dùng</div>
+                                        <small class="user-role" id="userRole">Vai trò</small>
+                                    </div>
+                                    <!-- Mobile-only text -->
+                                    <span class="d-sm-none ms-1" id="userNameMobile">Tài khoản</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <i class="fas fa-user-cog me-2"></i>
+                                            <span class="d-none d-sm-inline">Thông tin tài khoản</span>
+                                            <span class="d-sm-none">Tài khoản</span>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" onclick="logout()">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Navigation Menu - Responsive với nền xanh, chữ trắng -->
+        <nav class="navbar navbar-expand-lg main-navigation">
+            <div class="container-fluid">
+                <!-- Mobile navigation toggle -->
+                <button class="navbar-toggler d-lg-none border-0" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" 
+                        aria-label="Toggle main navigation">
+                    <i class="fas fa-bars text-white"></i>
+                </button>
+                
+                <!-- Main navigation menu -->
+                <div class="collapse navbar-collapse" id="mainNavigation">
+                    <ul class="navbar-nav w-100 justify-content-between" id="mainMenu">
+                        <!-- Menu items will be generated by JavaScript -->
+                        <!-- Fallback loading state -->
+                        <li class="nav-item loading-mobile">
+                            <div class="spinner-border spinner-border-sm text-white" role="status">
+                                <span class="visually-hidden">Đang tải menu...</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Mobile swipe indicator -->
+                <div class="swipe-indicator d-lg-none"></div>
+            </div>
+        </nav>
+
+        <!-- Content Area với responsive container -->
+        <div class="container-fluid py-3 py-md-4">
+            <div id="contentArea">
+                <!-- Dashboard Module -->
+                <div id="dashboard" class="module-content">
+                    <!-- Welcome Header - Responsive -->
+                    <div class="welcome-header mb-3 mb-md-4">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-8">
+                                <h2 class="text-primary mb-2 fs-3 fs-md-2">
+                                    <span class="d-none d-sm-inline">Chào mừng đến Hệ thống Biểu quyết</span>
+                                    <span class="d-sm-none">Hệ thống Biểu quyết</span>
+                                </h2>
+                                <p class="text-muted fs-6 fs-md-5 mb-0">
+                                    <span class="d-none d-sm-inline">Sử dụng menu phía trên để truy cập các chức năng.</span>
+                                    <span class="d-sm-none">Chọn chức năng từ menu.</span>
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end d-none d-md-block">
+                                <i class="fas fa-vote-yea dashboard-bg-icon opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Cards - Enhanced Responsive Grid -->
+                    <div class="row g-3 g-md-4">
+                        <!-- Pending Votes Card -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <div class="card dashboard-card h-100 clickable-card border-0 shadow-sm" 
+                                 onclick="showVoteManagementTab('vote-participation')" 
+                                 role="button" 
+                                 tabindex="0"
+                                 onkeypress="if(event.key==='Enter') showVoteManagementTab('vote-participation')">
+                                <div class="card-body text-center p-3 p-md-4">
+                                    <div class="dashboard-icon mb-3">
+                                        <i class="fas fa-clock fa-2x fa-md-3x text-warning"></i>
+                                    </div>
+                                    <h5 class="card-title text-muted mb-2 fs-6 fs-md-5">
+                                        <span class="d-none d-sm-inline">PHIẾU ĐANG CHỜ BIỂU QUYẾT</span>
+                                        <span class="d-sm-none">CHỜ BQ</span>
+                                    </h5>
+                                    <h2 class="dashboard-number text-primary mb-0 fs-1" id="pendingVotesCount">5</h2>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed Votes Card -->
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <div class="card dashboard-card h-100 clickable-card border-0 shadow-sm" 
+                                 onclick="showVoteManagementTab('vote-results')" 
+                                 role="button" 
+                                 tabindex="0"
+                                 onkeypress="if(event.key==='Enter') showVoteManagementTab('vote-results')">
+                                <div class="card-body text-center p-3 p-md-4">
+                                    <div class="dashboard-icon mb-3">
+                                        <i class="fas fa-check-circle fa-2x fa-md-3x text-success"></i>
+                                    </div>
+                                    <h5 class="card-title text-muted mb-2 fs-6 fs-md-5">
+                                        <span class="d-none d-sm-inline">PHIẾU BIỂU QUYẾT ĐÃ HOÀN THÀNH</span>
+                                        <span class="d-sm-none">ĐÃ HOÀN THÀNH</span>
+                                    </h5>
+                                    <h2 class="dashboard-number text-success mb-0 fs-1" id="completedVotesCount">2</h2>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Draft Comments Card -->
+                        <div class="col-12 col-sm-12 col-lg-4">
+                            <div class="card dashboard-card h-100 clickable-card border-0 shadow-sm" 
+                                 onclick="showModule('draftManagement')" 
+                                 role="button" 
+                                 tabindex="0"
+                                 onkeypress="if(event.key==='Enter') showModule('draftManagement')">
+                                <div class="card-body text-center p-3 p-md-4">
+                                    <div class="dashboard-icon mb-3">
+                                        <i class="fas fa-comment-dots fa-2x fa-md-3x text-info"></i>
+                                    </div>
+                                    <h5 class="card-title text-muted mb-2 fs-6 fs-md-5">
+                                        <span class="d-none d-sm-inline">GÓP Ý DỰ THẢO TỜ TRÌNH</span>
+                                        <span class="d-sm-none">GÓP Ý</span>
+                                    </h5>
+                                    <h2 class="dashboard-number text-info mb-0 fs-1" id="draftCommentsCount">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Draft Management Module -->
+                <div id="draftManagement" class="module-content d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="text-primary mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Dự Thảo Tờ Trình
+                        </h3>
+                        <button id="createDraftButton" class="btn btn-primary" onclick="showCreateDraftModal()">
+                            <i class="fas fa-plus me-2"></i>Tạo dự thảo mới
+                        </button>
+                    </div>
+                    
+                    <!-- Draft Management Tabs -->
+                    <ul class="nav nav-tabs nav-fill" id="draftTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold" id="active-drafts-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#active-drafts" type="button" role="tab" 
+                                    onclick="loadActiveDrafts()"
+                                    style="border-radius: 8px 8px 0 0;">
+                                <i class="fas fa-edit me-2 text-primary"></i>
+                                <span class="text-primary">Dự thảo đang mở góp ý</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold" id="closed-drafts-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#closed-drafts" type="button" role="tab" 
+                                    onclick="loadClosedDrafts()"
+                                    style="border-radius: 8px 8px 0 0;">
+                                <i class="fas fa-lock me-2 text-primary"></i>
+                                <span class="text-primary">Dự thảo đã kết thúc góp ý</span>
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="draftTabContent">
+                        <!-- Active Drafts Tab -->
+                        <div class="tab-pane fade show active" id="active-drafts" role="tabpanel">
+                            <div class="card shadow-sm mt-3">
+                                <div class="card-header bg-primary text-white border-bottom d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0 text-white">
+                                            <i class="fas fa-edit me-2"></i>Danh sách dự thảo đang mở góp ý
+                                        </h5>
+                                        <span class="badge bg-light text-primary" id="activeDraftsCount">0</span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- Active Drafts Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th class="text-center text-white d-none d-md-table-cell" style="width: 50px;">#</th>
+                                                    <th class="text-white">Tiêu đề</th>
+                                                    <th class="text-center text-white d-none d-lg-table-cell" style="width: 130px;">Ngày tạo</th>
+                                                    <th class="text-center text-white d-none d-lg-table-cell" style="width: 130px;">Thời hạn góp ý</th>
+                                                    <th class="text-center text-white" style="width: 120px;">Hành động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="activeDraftsTableBody">
+                                                <!-- Active drafts will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Empty state for active drafts -->
+                                    <div id="activeDraftsEmptyState" class="text-center py-5 d-none">
+                                        <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                                        <h5 class="text-muted mt-3">Chưa có dự thảo đang mở góp ý</h5>
+                                        <p class="text-muted">Nhấn nút "Tạo dự thảo mới" để bắt đầu</p>
+                                        <button id="createDraftEmptyButton" class="btn btn-primary" onclick="showCreateDraftModal()">
+                                            <i class="fas fa-plus me-2"></i>Tạo dự thảo đầu tiên
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Closed Drafts Tab -->
+                        <div class="tab-pane fade" id="closed-drafts" role="tabpanel">
+                            <div class="card shadow-sm mt-3">
+                                <div class="card-header bg-primary text-white border-bottom d-none">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0 text-white">
+                                            <i class="fas fa-lock me-2"></i>Danh sách dự thảo đã kết thúc góp ý
+                                        </h5>
+                                        <span class="badge bg-light text-primary" id="closedDraftsCount">0</span>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- Closed Drafts Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th class="text-center text-white d-none d-md-table-cell" style="width: 50px;">#</th>
+                                                    <th class="text-white">Tiêu đề</th>
+                                                    <th class="text-center text-white d-none d-lg-table-cell" style="width: 130px;">Ngày tạo</th>
+                                                    <th class="text-center text-white d-none d-lg-table-cell" style="width: 130px;">Ngày kết thúc</th>
+                                                    <!-- <th class="text-center text-white d-none d-xl-table-cell" style="width: 120px;">Người kết thúc</th> -->
+                                                    <th class="text-center text-white d-none d-md-table-cell" style="width: 80px;">Số góp ý</th>
+                                                    <th class="text-center text-white" style="width: 120px;">Hành động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="closedDraftsTableBody">
+                                                <!-- Closed drafts will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Empty state for closed drafts -->
+                                    <div id="closedDraftsEmptyState" class="text-center py-5 d-none">
+                                        <i class="fas fa-lock text-muted" style="font-size: 4rem;"></i>
+                                        <h5 class="text-muted mt-3">Chưa có dự thảo nào đã kết thúc góp ý</h5>
+                                        <p class="text-muted">Các dự thảo đã kết thúc góp ý sẽ hiển thị ở đây</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Draft Modal -->
+                <div class="modal fade" id="createDraftModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-plus me-2"></i>Tạo Dự thảo Tờ trình Mới
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="draftForm">
+                                    <div class="mb-3">
+                                        <label for="draftTitle" class="form-label">
+                                            <i class="fas fa-heading me-2"></i>Tiêu đề Tờ trình <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="draftTitle" 
+                                               placeholder="Nhập tiêu đề tờ trình..." required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="draftContent" class="form-label">
+                                            <i class="fas fa-align-left me-2"></i>Nội dung tóm tắt tờ trình <span class="text-danger">*</span>
+                                        </label>
+                                        <textarea class="form-control" id="draftContent" rows="8" 
+                                                  placeholder="Nhập nội dung chi tiết của tờ trình..." required></textarea>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="commentPeriod" class="form-label">
+                                                    <i class="fas fa-calendar me-2"></i>Thời gian góp ý (ngày) <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="commentPeriod" 
+                                                           value="7" min="1" max="365" required
+                                                           placeholder="Nhập số ngày...">
+                                                    <span class="input-group-text">ngày</span>
+                                                </div>
+                                                <div class="form-text">
+                                                    Từ 1 đến 365 ngày (mặc định: 7 ngày)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="draftPriority" class="form-label">
+                                                    <i class="fas fa-flag me-2"></i>Mức độ ưu tiên
+                                                </label>
+                                                <select class="form-control" id="draftPriority">
+                                                    <option value="normal" selected>Bình thường</option>
+                                                    <option value="important">Quan trọng</option>
+                                                    <option value="urgent">Khẩn cấp</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="draftFiles" class="form-label">
+                                            <i class="fas fa-paperclip me-2"></i>Đính kèm tài liệu
+                                        </label>
+                                        <input type="file" class="form-control" id="draftFiles" 
+                                               multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+                                        <div class="form-text">
+                                            Chấp nhận các file: PDF, Word, Excel, PowerPoint (tối đa 10MB mỗi file)
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-users me-2"></i>Người được xem nội dung dự thảo <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="viewerType" id="viewerAll" value="all" checked>
+                                            <label class="form-check-label" for="viewerAll">
+                                                <i class="fas fa-globe me-2"></i>Tất cả người dùng
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="viewerType" id="viewerSpecific" value="specific">
+                                            <label class="form-check-label" for="viewerSpecific">
+                                                <i class="fas fa-user-check me-2"></i>Chọn người dùng cụ thể
+                                            </label>
+                                        </div>
+                                        <div id="specificViewers" class="mt-3 d-none">
+                                            <div class="card border-light">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-search me-2"></i>Tìm kiếm và chọn người dùng:
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <input type="text" class="form-control" id="userSearch" 
+                                                               placeholder="Nhập tên hoặc username để tìm kiếm...">
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h6>Danh sách người dùng:</h6>
+                                                            <div id="availableUsers" class="border rounded p-2" style="height: 200px; overflow-y: auto;">
+                                                                <!-- Available users will be loaded here -->
+                                                                <div class="text-center text-muted py-3">
+                                                                    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách...
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6>Đã chọn:</h6>
+                                                            <div id="selectedUsers" class="border rounded p-2" style="height: 200px; overflow-y: auto;">
+                                                                <div class="text-center text-muted py-3">
+                                                                    <i class="fas fa-user-plus"></i> Chưa chọn người dùng nào
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-info-circle me-1"></i>
+                                                            Click vào tên để chọn/bỏ chọn người dùng
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </button>
+                                <button type="submit" form="draftForm" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Tạo Dự thảo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Draft Details Modal -->
+                <div class="modal fade" id="draftDetailsModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-eye me-2"></i>Chi tiết Dự thảo Tờ trình
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="draftDetailsContent">
+                                    <!-- Content will be loaded dynamically -->
+                                </div>
+                            </div>
+                            <div class="modal-footer" id="draftModalFooter">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Đóng
+                                </button>
+                                <!-- Dynamic action buttons will be populated here by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vote Management Module -->
+                <div id="voteManagement" class="module-content d-none">
+                    <h3><i class="fas fa-vote-yea me-2"></i>Biểu quyết</h3>
+                    
+                    <!-- Create Vote Button - Similar to Draft Management -->
+                    <div class="d-flex justify-content-end mb-3">
+                        <button id="createVoteBtn" class="btn btn-primary" style="display: none;" onclick="openCreateVoteModal()">
+                            <i class="fas fa-plus me-2"></i>Tạo phiếu biểu quyết
+                        </button>
+                    </div>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="voteManagementTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="vote-participation-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#vote-participation" type="button" role="tab" 
+                                            aria-controls="vote-participation" aria-selected="true">
+                                        <i class="fas fa-vote-yea me-2"></i>Tham gia biểu quyết
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="vote-results-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#vote-results" type="button" role="tab" 
+                                            aria-controls="vote-results" aria-selected="false">
+                                        <i class="fas fa-chart-bar me-2"></i>Kết quả biểu quyết
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="voteManagementTabContent">
+                                <!-- Vote Participation Tab -->
+                                <div class="tab-pane fade show active" id="vote-participation" role="tabpanel" 
+                                     aria-labelledby="vote-participation-tab">
+                                    <div id="votesList">
+                                        <!-- Votes list will be loaded here -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Vote Results Tab -->
+                                <div class="tab-pane fade" id="vote-results" role="tabpanel" 
+                                     aria-labelledby="vote-results-tab">
+                                    <div id="endVotesList">
+                                        <!-- End votes list will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Vote Modal -->
+                <div class="modal fade" id="createVoteModal" tabindex="-1" aria-labelledby="createVoteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="createVoteModalLabel">
+                                    <i class="fas fa-plus-circle me-2"></i>Tạo Phiếu Biểu quyết
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="createVoteForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="voteNumber" class="form-label">Số phiếu *</label>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" id="voteNumber" placeholder="Nhập số" required>
+                                                    <span class="input-group-text">/2025/CHP-HĐQT</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="voteTitle" class="form-label">Tiêu đề biểu quyết *</label>
+                                                <input type="text" class="form-control" id="voteTitle" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="voteContent" class="form-label">Nội dung biểu quyết *</label>
+                                        <textarea class="form-control" id="voteContent" rows="6" required></textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="voteFiles" class="form-label">Đính kèm tài liệu</label>
+                                        <input type="file" class="form-control" id="voteFiles" multiple accept=".pdf,.doc,.docx,.xls,.xlsx">
+                                        <div class="form-text">Giới hạn mỗi file: 300MB</div>
+                                    </div>
+
+                                    <!-- Thời gian biểu quyết -->
+                                    <div class="mb-4">
+                                        <h6 class="form-label fw-bold text-primary">
+                                            <i class="fas fa-calendar-alt me-2"></i>Thời gian biểu quyết
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="voteStartDate" class="form-label">
+                                                        <i class="fas fa-play me-2"></i>Ngày bắt đầu <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="date" class="form-control" id="voteStartDate" required>
+                                                    <div class="form-text">Ngày người dùng có thể bắt đầu biểu quyết (00:00)</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="voteEndDate" class="form-label">
+                                                        <i class="fas fa-stop me-2"></i>Ngày kết thúc <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="date" class="form-control" id="voteEndDate" required>
+                                                    <div class="form-text">Ngày tự động đóng phiếu biểu quyết (23:59)</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="autoCloseVote" checked>
+                                                    <label class="form-check-label" for="autoCloseVote">
+                                                        <i class="fas fa-robot me-2"></i>Tự động đóng phiếu khi hết thời gian
+                                                    </label>
+                                                </div>
+                                                <div class="form-text text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Hệ thống sẽ tự động đóng phiếu và ngăn không cho biểu quyết thêm sau thời gian kết thúc
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Chỉ định người tham gia biểu quyết *</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="assigneeType" id="assignAll" value="all" checked>
+                                            <label class="form-check-label" for="assignAll">
+                                                Tất cả người dùng (trừ Admin)
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="assigneeType" id="assignSpecific" value="specific">
+                                            <label class="form-check-label" for="assignSpecific">
+                                                Chọn người dùng cụ thể
+                                            </label>
+                                        </div>
+                                        <div id="specificUsers" class="mt-2 d-none">
+                                            <div class="card">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-users me-2"></i>Chọn người tham gia biểu quyết
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                                    <div id="usersLoading" class="text-center">
+                                                        <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách người dùng...
+                                                    </div>
+                                                    <div id="usersList">
+                                                        <!-- User checkboxes will be populated here -->
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer bg-light">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Chọn những người được phép tham gia biểu quyết này
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="submitCreateVote()">
+                                    <i class="fas fa-paper-plane me-2"></i>Tạo Phiếu Biểu quyết
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Module -->
+                <div id="history" class="module-content d-none">
+                    <h3><i class="fas fa-history me-2"></i>Lịch sử Biểu quyết</h3>
+                    
+                    <div id="historyContent">
+                        <!-- History content will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Documents Module -->
+                <div id="documents" class="module-content d-none">
+                    <h3><i class="fas fa-folder me-2"></i>Tủ Tài liệu</h3>
+                    
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-file me-2"></i>Danh sách Tài liệu</h5>
+                            <button class="btn btn-primary" id="uploadDocBtn">
+                                <i class="fas fa-upload me-2"></i>Tải lên Tài liệu
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="documentsContent">
+                                <!-- Documents will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Digital Signature Module -->
+                <div id="digitalSign" class="module-content d-none">
+                    <h3><i class="fas fa-signature me-2"></i>Ký số Văn bản</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-file-signature me-2"></i>Tạo Văn bản Ký số</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="digitalSignForm">
+                                        <div class="mb-3">
+                                            <label for="docType" class="form-label">Loại văn bản *</label>
+                                            <select class="form-select" id="docType" required>
+                                                <option value="">Chọn loại văn bản</option>
+                                                <option value="vote_summary">Phiếu tổng hợp lấy ý kiến</option>
+                                                <option value="resolution">Nghị quyết</option>
+                                                <option value="other">Văn bản khác</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="signDocument" class="form-label">Chọn văn bản cần ký *</label>
+                                            <input type="file" class="form-control" id="signDocument" accept=".pdf,.doc,.docx" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="signNote" class="form-label">Ghi chú</label>
+                                            <textarea class="form-control" id="signNote" rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-signature me-2"></i>Trình ký
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-list me-2"></i>Danh sách Ký số</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="signaturesList">
+                                        <!-- Signatures will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vote Summary Module -->
+                <div id="summary" class="module-content d-none">
+                    <h3><i class="fas fa-clipboard-list me-2"></i>Phiếu Tổng hợp Lấy ý kiến</h3>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-chart-pie me-2"></i>Danh sách Phiếu Tổng hợp</h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Tạo Phiếu Tổng hợp
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="summaryList">
+                                        <!-- Summaries will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resolution Management Module -->
+                <div id="resolution" class="module-content d-none">
+                    <h3><i class="fas fa-gavel me-2"></i>Quản lý Nghị quyết</h3>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-file-contract me-2"></i>Danh sách Nghị quyết</h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Tạo Nghị quyết
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="resolutionList">
+                                        <!-- Resolutions will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Module -->
+                <div id="admin" class="module-content d-none">
+                    <h3><i class="fas fa-cogs me-2"></i>Quản trị Hệ thống</h3>
+                    
+                    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
+                                <i class="fas fa-users me-2"></i>Quản lý Người dùng
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="admin-drafts-tab" data-bs-toggle="tab" data-bs-target="#admin-drafts" type="button" role="tab" onclick="setTimeout(() => loadAllDraftsForAdmin(), 100)">
+                                <i class="fas fa-file-alt me-2"></i>Quản lý Dự thảo
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions" type="button" role="tab" onclick="setTimeout(() => loadPermissions(), 100)">
+                                <i class="fas fa-key me-2"></i>Phân quyền
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="votes-tab" data-bs-toggle="tab" data-bs-target="#votes" type="button" role="tab">
+                                <i class="fas fa-vote-yea me-2"></i>Quản lý Biểu quyết
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="adminTabContent">
+                        <!-- Users Management -->
+                        <div class="tab-pane fade show active" id="users" role="tabpanel">
+                            <div class="card mt-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-users me-2"></i>Danh sách Người dùng</h5>
+                                    <div>
+                                        <button class="btn btn-success me-2" onclick="testPing()">
+                                            <i class="fas fa-heartbeat me-2"></i>Test Ping
+                                        </button>
+                                        <button class="btn btn-info me-2" onclick="testDbConnectionDirect()">
+                                            <i class="fas fa-server me-2"></i>Test Direct
+                                        </button>
+                                        <button class="btn btn-secondary me-2" onclick="testDbConnection()">
+                                            <i class="fas fa-database me-2"></i>Test DB
+                                        </button>
+                                        <button class="btn btn-primary" onclick="showAddUserModal()">
+                                            <i class="fas fa-plus me-2"></i>Thêm Người dùng
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="usersTable">
+                                        <!-- Users table will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Admin Drafts Management -->
+                        <div class="tab-pane fade" id="admin-drafts" role="tabpanel">
+                            <div class="card mt-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-file-alt me-2"></i>Quản lý Tất cả Dự thảo</h5>
+                                    <div>
+                                        <button class="btn btn-success me-2" onclick="loadAllDraftsForAdmin()">
+                                            <i class="fas fa-sync me-2"></i>Tải lại
+                                        </button>
+                                        <button class="btn btn-primary" onclick="showCreateDraftModal()">
+                                            <i class="fas fa-plus me-2"></i>Tạo dự thảo mới
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Search and Filter -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tìm kiếm:</label>
+                                            <input type="text" class="form-control" id="draftSearch" placeholder="Tìm theo tiêu đề..." onkeyup="filterDrafts()">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Lọc theo trạng thái:</label>
+                                            <select class="form-select" id="draftStatusFilter" onchange="filterDrafts()">
+                                                <option value="">Tất cả trạng thái</option>
+                                                <option value="Draft">Dự thảo</option>
+                                                <option value="Review">Đang xem xét</option>
+                                                <option value="Approved">Đã duyệt</option>
+                                                <option value="Rejected">Từ chối</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Lọc theo người tạo:</label>
+                                            <select class="form-select" id="draftCreatorFilter" onchange="filterDrafts()">
+                                                <option value="">Tất cả người tạo</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">&nbsp;</label>
+                                            <div class="d-grid">
+                                                <button class="btn btn-outline-secondary" onclick="clearDraftFilters()">
+                                                    <i class="fas fa-eraser me-1"></i>Xóa lọc
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Drafts Table -->
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th class="text-center" style="width: 50px;">#</th>
+                                                    <th>Tiêu đề</th>
+                                                    <th class="text-center" style="width: 130px;">Trạng thái</th>
+                                                    <th class="text-center d-none d-md-table-cell" style="width: 120px;">Người tạo</th>
+                                                    <th class="text-center d-none d-lg-table-cell" style="width: 110px;">Ngày tạo</th>
+                                                    <th class="text-center" style="width: 80px;">Góp ý</th>
+                                                    <th class="text-center" style="width: 150px;">Hành động</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="allDraftsTableBody">
+                                                <!-- All drafts will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Loading indicator -->
+                                    <div id="draftsLoading" class="text-center py-4 d-none">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted">Đang tải danh sách dự thảo...</p>
+                                    </div>
+                                    
+                                    <!-- Empty state -->
+                                    <div id="draftsEmptyState" class="text-center py-5 d-none">
+                                        <i class="fas fa-file-alt text-muted" style="font-size: 4rem;"></i>
+                                        <h5 class="text-muted mt-3">Chưa có dự thảo nào</h5>
+                                        <p class="text-muted">Nhấn nút "Tạo dự thảo mới" để bắt đầu</p>
+                                        <button class="btn btn-primary" onclick="showCreateDraftModal()">
+                                            <i class="fas fa-plus me-2"></i>Tạo dự thảo đầu tiên
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Permissions Management -->
+                        <div class="tab-pane fade" id="permissions" role="tabpanel">
+                            <div class="card mt-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5><i class="fas fa-key me-2"></i>Ma trận Phân quyền</h5>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-success" onclick="saveAllPermissions()">
+                                            <i class="fas fa-save me-2"></i>Lưu tất cả
+                                        </button>
+                                        <button class="btn btn-info" onclick="resetPermissions()">
+                                            <i class="fas fa-undo me-2"></i>Khôi phục
+                                        </button>
+                                        <button class="btn btn-warning" onclick="exportPermissions()">
+                                            <i class="fas fa-download me-2"></i>Xuất file
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Permission Matrix Header -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Tìm kiếm người dùng:</label>
+                                            <input type="text" class="form-control" id="permissionSearch" placeholder="Nhập tên hoặc username..." onkeyup="filterPermissionMatrix()">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Lọc theo vai trò:</label>
+                                            <select class="form-select" id="permissionRoleFilter" onchange="filterPermissionMatrix()">
+                                                <option value="">Tất cả vai trò</option>
+                                                <option value="Admin">Admin</option>
+                                                <option value="Manager">Manager</option>
+                                                <option value="Member">Member</option>
+                                                <option value="User">User</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label">Thao tác hàng loạt:</label>
+                                            <div class="btn-group w-100" role="group">
+                                                <button class="btn btn-outline-primary" onclick="selectAllUsers()">
+                                                    <i class="fas fa-check-square me-1"></i>Chọn tất cả
+                                                </button>
+                                                <button class="btn btn-outline-secondary" onclick="unselectAllUsers()">
+                                                    <i class="fas fa-square me-1"></i>Bỏ chọn
+                                                </button>
+                                                <button class="btn btn-outline-success" onclick="grantSelectedPermissions()">
+                                                    <i class="fas fa-plus me-1"></i>Cấp quyền
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="revokeSelectedPermissions()">
+                                                    <i class="fas fa-minus me-1"></i>Thu hồi
+                                                </button>
+                                                <button class="btn btn-info" onclick="loadPermissions()">
+                                                    <i class="fas fa-sync me-1"></i>Tải lại
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Permission Matrix Table -->
+                                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                                        <table class="table table-bordered table-hover" id="permissionMatrix">
+                                            <thead class="table-dark sticky-top">
+                                                <tr>
+                                                    <th style="min-width: 50px;">
+                                                        <input type="checkbox" id="selectAllUsersCheckbox" onchange="toggleAllUsers()" title="Chọn/Bỏ chọn tất cả users">
+                                                    </th>
+                                                    <th style="min-width: 80px;">ID</th>
+                                                    <th style="min-width: 150px;">Tên người dùng</th>
+                                                    <th style="min-width: 200px;">Họ tên</th>
+                                                    <th style="min-width: 100px;">Vai trò</th>
+                                                    <!-- Dynamic permission columns will be added here -->
+                                                </tr>
+                                                <tr class="table-secondary">
+                                                    <th colspan="5" class="text-center">Quyền hệ thống</th>
+                                                    <!-- Permission toggle buttons row -->
+                                                </tr>
+                                            </thead>
+                                            <tbody id="permissionMatrixBody">
+                                                <!-- User rows with permission checkboxes will be added here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Permission Legend -->
+                                    <div class="mt-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6><i class="fas fa-info-circle me-2"></i>Chú thích:</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <li><i class="fas fa-check-square text-success me-2"></i>Có quyền truy cập</li>
+                                                            <li><i class="fas fa-square text-muted me-2"></i>Không có quyền</li>
+                                                            <li><i class="fas fa-crown text-warning me-2"></i>Admin (có tất cả quyền)</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <small class="text-muted">
+                                                            <strong>Mẹo:</strong> Click vào tên cột để cấp/thu hồi quyền cho tất cả users được chọn.
+                                                            Click vào checkbox từng user để chọn/bỏ chọn.
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Votes Management -->
+                        <div class="tab-pane fade" id="votes" role="tabpanel">
+                            <div class="card mt-3">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-vote-yea me-2"></i>Quản lý Phiếu Biểu quyết</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="adminVotesTable">
+                                        <!-- Admin votes table will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recycle Bin Module -->
+    <div id="recycleBin" class="module-content d-none">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-trash-restore me-2"></i>Thùng rác
+                                </h5>
+                                <div>
+                                    <span class="badge bg-light text-dark me-2">
+                                        <i class="fas fa-items-alt me-1"></i>
+                                        <span id="recycleBinTotal">0</span> mục
+                                    </span>
+                                    <button class="btn btn-outline-light btn-sm" onclick="emptyRecycleBin()" title="Làm trống thùng rác">
+                                        <i class="fas fa-trash"></i> Làm trống
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Lưu ý:</strong> Các mục trong thùng rác có thể được khôi phục hoặc xóa vĩnh viễn. 
+                                Việc xóa vĩnh viễn không thể hoàn tác.
+                            </div>
+                            
+                            <!-- Empty State -->
+                            <div id="recycleBinEmptyState" class="text-center py-5 d-none">
+                                <i class="fas fa-trash text-muted" style="font-size: 4rem;"></i>
+                                <h4 class="text-muted mt-3">Thùng rác trống</h4>
+                                <p class="text-muted">Không có mục nào trong thùng rác</p>
+                            </div>
+                            
+                            <!-- Recycle Bin Table -->
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th class="text-center" style="width: 60px;">#</th>
+                                            <th>Mục đã xóa</th>
+                                            <th class="text-center" style="width: 150px;">Người xóa</th>
+                                            <th class="text-center" style="width: 150px;">Ngày xóa</th>
+                                            <th class="text-center" style="width: 280px;">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recycleBinTableBody">
+                                        <!-- Recycle bin items will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Thêm Người dùng Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label for="newUsername" class="form-label">Tên đăng nhập *</label>
+                            <input type="text" class="form-control" id="newUsername" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newFullName" class="form-label">Họ tên *</label>
+                            <input type="text" class="form-control" id="newFullName" name="fullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Mật khẩu *</label>
+                            <input type="password" class="form-control" id="newPassword" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRole" class="form-label">Vai trò *</label>
+                            <select class="form-select" id="newRole" name="role" required>
+                                <option value="User">Người dùng</option>
+                                <option value="Admin">Quản trị viên</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" form="addUserForm" class="btn btn-primary">Thêm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Draft Modal -->
+    <div class="modal fade" id="createDraftModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-file-alt me-2"></i>Tạo Dự thảo Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createDraftForm">
+                        <div class="mb-3">
+                            <label for="draftTitle" class="form-label">Tiêu đề dự thảo *</label>
+                            <input type="text" class="form-control" id="draftTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="draftContent" class="form-label">Nội dung tóm tắt dự thảo *</label>
+                            <textarea class="form-control" id="draftContent" name="content" rows="8" required placeholder="Nhập nội dung tóm tắt dự thảo..."></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="commentPeriod" class="form-label">Thời gian góp ý (ngày)</label>
+                                    <select class="form-select" id="commentPeriod" name="commentPeriod">
+                                        <option value="7">7 ngày</option>
+                                        <option value="14" selected>14 ngày</option>
+                                        <option value="21">21 ngày</option>
+                                        <option value="30">30 ngày</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="attachedFiles" class="form-label">Tệp đính kèm</label>
+                                    <input type="file" class="form-control" id="attachedFiles" name="attachedFiles" multiple>
+                                    <div class="form-text">Có thể chọn nhiều tệp (PDF, DOC, DOCX, JPG, PNG)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="submitDraft">
+                        <i class="fas fa-save me-2"></i>Tạo Dự thảo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permission Management Modal -->
+    <div class="modal fade" id="editPermissionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-key me-2"></i>Chỉnh sửa Quyền người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editPermissionForm">
+                        <input type="hidden" id="editPermissionUserId">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tên đăng nhập:</label>
+                                <input type="text" class="form-control" id="editPermissionUsername" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Họ tên:</label>
+                                <input type="text" class="form-control" id="editPermissionFullName" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Vai trò:</label>
+                            <select class="form-select" id="editPermissionRole">
+                                <option value="User">User - Người dùng</option>
+                                <option value="Manager">Manager - Quản lý</option>
+                                <option value="Admin">Admin - Quản trị viên</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Quyền truy cập:</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_view_dashboard">
+                                        <label class="form-check-label" for="perm_view_dashboard">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Xem Dashboard
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_vote_management">
+                                        <label class="form-check-label" for="perm_vote_management">
+                                            <i class="fas fa-vote-yea me-2"></i>Quản lý Biểu quyết
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_draft_management">
+                                        <label class="form-check-label" for="perm_draft_management">
+                                            <i class="fas fa-file-alt me-2"></i>Quản lý Dự thảo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_create_vote">
+                                        <label class="form-check-label" for="perm_create_vote">
+                                            <i class="fas fa-plus-circle me-2"></i>Tạo Phiếu biểu quyết
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_create_draft">
+                                        <label class="form-check-label" for="perm_create_draft">
+                                            <i class="fas fa-edit me-2"></i>Tạo Dự thảo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_close_draft">
+                                        <label class="form-check-label" for="perm_close_draft">
+                                            <i class="fas fa-lock me-2"></i>Kết thúc góp ý
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_user_management">
+                                        <label class="form-check-label" for="perm_user_management">
+                                            <i class="fas fa-users-cog me-2"></i>Quản lý Người dùng
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_view_results">
+                                        <label class="form-check-label" for="perm_view_results">
+                                            <i class="fas fa-chart-bar me-2"></i>Xem Kết quả
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="perm_system_admin">
+                                        <label class="form-check-label" for="perm_system_admin">
+                                            <i class="fas fa-cogs me-2"></i>Quản trị Hệ thống
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUserPermissions()">
+                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Permission Modal -->
+    <div class="modal fade" id="bulkPermissionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-users-cog me-2"></i>Phân quyền Hàng loạt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bulkPermissionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Chọn người dùng:</label>
+                            <div id="bulkUserSelection" class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                                <!-- User checkboxes will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Vai trò mới:</label>
+                            <select class="form-select" id="bulkPermissionRole">
+                                <option value="">-- Không thay đổi --</option>
+                                <option value="User">User - Người dùng</option>
+                                <option value="Manager">Manager - Quản lý</option>
+                                <option value="Admin">Admin - Quản trị viên</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Thao tác với quyền:</label>
+                            <div class="btn-group w-100 mb-2" role="group">
+                                <input type="radio" class="btn-check" name="permissionAction" id="addPermissions" value="add">
+                                <label class="btn btn-outline-success" for="addPermissions">
+                                    <i class="fas fa-plus me-2"></i>Thêm quyền
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="permissionAction" id="removePermissions" value="remove">
+                                <label class="btn btn-outline-warning" for="removePermissions">
+                                    <i class="fas fa-minus me-2"></i>Xóa quyền
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="permissionAction" id="replacePermissions" value="replace" checked>
+                                <label class="btn btn-outline-primary" for="replacePermissions">
+                                    <i class="fas fa-sync me-2"></i>Thay thế
+                                </label>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_view_dashboard">
+                                        <label class="form-check-label" for="bulk_perm_view_dashboard">
+                                            <i class="fas fa-tachometer-alt me-2"></i>Xem Dashboard
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_vote_management">
+                                        <label class="form-check-label" for="bulk_perm_vote_management">
+                                            <i class="fas fa-vote-yea me-2"></i>Quản lý Biểu quyết
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_draft_management">
+                                        <label class="form-check-label" for="bulk_perm_draft_management">
+                                            <i class="fas fa-file-alt me-2"></i>Quản lý Dự thảo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_create_vote">
+                                        <label class="form-check-label" for="bulk_perm_create_vote">
+                                            <i class="fas fa-plus-circle me-2"></i>Tạo Phiếu biểu quyết
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_create_draft">
+                                        <label class="form-check-label" for="bulk_perm_create_draft">
+                                            <i class="fas fa-edit me-2"></i>Tạo Dự thảo
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_close_draft">
+                                        <label class="form-check-label" for="bulk_perm_close_draft">
+                                            <i class="fas fa-lock me-2"></i>Kết thúc góp ý
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_user_management">
+                                        <label class="form-check-label" for="bulk_perm_user_management">
+                                            <i class="fas fa-users-cog me-2"></i>Quản lý Người dùng
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_view_results">
+                                        <label class="form-check-label" for="bulk_perm_view_results">
+                                            <i class="fas fa-chart-bar me-2"></i>Xem Kết quả
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="bulk_perm_system_admin">
+                                        <label class="form-check-label" for="bulk_perm_system_admin">
+                                            <i class="fas fa-cogs me-2"></i>Quản trị Hệ thống
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBulkPermissions()">
+                        <i class="fas fa-save me-2"></i>Áp dụng thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vote Detail Modal -->
+    <div class="modal fade" id="voteDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="voteDetailTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body" id="voteDetailContent">
+                    <!-- Vote details will be loaded here -->
+                </div>
+                <div class="modal-footer" id="voteDetailFooter">
+                    <!-- Footer buttons will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Footer -->
+        <footer class="main-footer mt-5">
+            <div class="container-fluid">
+                <div class="row align-items-center py-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiMyRTVCQkEiLz4KPHN2ZyB4PSI4IiB5PSI4IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSI+CjxwYXRoIGQ9Ik0xOSAxNUwxMi45MjkzIDguOTI5M0MxMi41Mzg4IDguNTM4ODMgMTIuNTM4OCA3LjkwNTI3IDEyLjkyOTMgNy41MTQ3MkMxMy4zMTk4IDcuMTI0MTYgMTMuOTUzNCA3LjEyNDE2IDE0LjM0MzkgNy41MTQ3MkwyMSAxNC4xNzE2VjEyQzIxIDExLjQ0NzcgMjEuNDQ3NyAxMSAyMiAxMUMyMi41NTIzIDExIDIzIDExLjQ0NzcgMjMgMTJWMTZIMTlDMTguNDQ3NyAxNiAxOCAxNS41NTIzIDE4IDE1WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cjwvc3ZnPgo=" alt="EVNCHP Logo" class="me-3">
+                            <div>
+                                <div class="footer-title">TỔ CNTT - P4 - EVNCHP</div>
+                                <small class="footer-subtitle">Tổng Công ty Điện lực Miền Trung</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="footer-info">
+                            <div class="mb-1">
+                                <i class="fas fa-envelope me-2"></i>
+                                <span>support@evnchp.vn</span>
+                            </div>
+                            <div class="mb-1">
+                                <i class="fas fa-phone me-2"></i>
+                                <span>(0254) 3xxx-xxx</span>
+                            </div>
+                            <div>
+                                <small class="text-muted">© 2025 EVNCHP. All rights reserved.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Version 1.0.0 | Last updated: <span id="lastUpdate"></span>
+                            </small>
+                            <div class="footer-links">
+                                <a href="#" class="text-decoration-none me-3" onclick="showSystemInfo()">
+                                    <i class="fas fa-info-circle me-1"></i>Thông tin hệ thống
+                                </a>
+                                <a href="#" class="text-decoration-none me-3" onclick="showHelp()">
+                                    <i class="fas fa-question-circle me-1"></i>Trợ giúp
+                                </a>
+                                <a href="#" class="text-decoration-none" onclick="showContact()">
+                                    <i class="fas fa-phone me-1"></i>Liên hệ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Deleted Item Details Modal -->
+    <div class="modal fade" id="deletedItemModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>Chi tiết mục đã xóa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="deletedItemContent">
+                        <!-- Content will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/modules/drafts.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Quick fix for recycle bin
+        console.log('🔧 Quick fix script loaded');
+        
+        // Wait for DOM and then fix recycle bin
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 DOM loaded, checking authentication before fixing...');
+            
+            // Only fix recycle bin if user is logged in
+            // Remove automatic calls - let app.js handle this
+            console.log('🔧 Waiting for authentication...');
+            
+            // Force fix when recycle bin module is shown
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const target = mutation.target;
+                        if (target.id === 'recycleBin' && !target.classList.contains('d-none')) {
+                            console.log('🔧 RecycleBin module shown, forcing fix...');
+                            setTimeout(() => fixRecycleBin(), 100);
+                        }
+                    }
+                });
+            });
+            
+            const recycleBinElement = document.getElementById('recycleBin');
+            if (recycleBinElement) {
+                observer.observe(recycleBinElement, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
+            }
+        });
+        
+        function fixRecycleBin() {
+            console.log('🔧 Starting recycle bin fix...');
+            
+            // Check authentication first
+            if (!window.isAuthenticated) {
+                console.log('⚠️ User not authenticated, skipping recycle bin fix');
+                return;
+            }
+            
+            // Check if recycleBin module exists
+            const recycleBin = document.getElementById('recycleBin');
+            if (!recycleBin) {
+                console.log('❌ RecycleBin module not found');
+                return;
+            }
+            
+            console.log('✅ Found recycleBin module');
+            
+            // Load data from API with credentials
+            fetch('/api/recycle-bin', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('📡 API Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📦 Recycle bin data:', data);
+                    
+                    const tableBody = document.getElementById('recycleBinTableBody');
+                    const emptyState = document.getElementById('recycleBinEmptyState');
+                    const totalElement = document.getElementById('recycleBinTotal');
+                    
+                    if (data && data.length > 0) {
+                        console.log('✅ Found', data.length, 'items in recycle bin');
+                        
+                        // Update total
+                        if (totalElement) {
+                            totalElement.textContent = data.length;
+                        }
+                        
+                        // Build table rows
+                        const rows = data.map(item => `
+                            <tr>
+                                <td>
+                                    <i class="fas fa-file-alt text-primary me-2"></i>
+                                    ${item.TypeName || 'Unknown'}
+                                </td>
+                                <td>${item.RecordTitle || 'No title'}</td>
+                                <td>${item.DeletedBy || 'Unknown'}</td>
+                                <td>${new Date(item.DeletedDate).toLocaleString('vi-VN')}</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm me-1" onclick="restoreItem(${item.RecycleBinID})" title="Khôi phục">
+                                        <i class="fas fa-undo me-1"></i>Khôi phục
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="permanentDelete(${item.RecycleBinID})" title="Xóa vĩnh viễn">
+                                        <i class="fas fa-trash me-1"></i>Xóa vĩnh viễn
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                        
+                        if (tableBody) {
+                            tableBody.innerHTML = rows;
+                        }
+                        
+                        if (emptyState) {
+                            emptyState.classList.add('d-none');
+                        }
+                        
+                        console.log('✅ Recycle bin table updated successfully');
+                    } else {
+                        console.log('📭 No items in recycle bin');
+                        
+                        if (totalElement) {
+                            totalElement.textContent = '0';
+                        }
+                        
+                        if (tableBody) {
+                            tableBody.innerHTML = '';
+                        }
+                        
+                        if (emptyState) {
+                            emptyState.classList.remove('d-none');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Recycle bin API error:', error);
+                    
+                    // Show error message
+                    const recycleBin = document.getElementById('recycleBin');
+                    if (recycleBin) {
+                        recycleBin.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h5>⚠️ Lỗi tải dữ liệu thùng rác</h5>
+                                <p>Lỗi: ${error.message}</p>
+                                <button class="btn btn-primary" onclick="fixRecycleBin()">
+                                    <i class="fas fa-refresh me-1"></i>Thử lại
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+        }
+        
+        // Add restore function
+        function restoreItem(recycleBinId) {
+            if (confirm('Bạn có chắc muốn khôi phục mục này?')) {
+                fetch(`/api/recycle-bin/${recycleBinId}/restore`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Khôi phục thành công!');
+                        fixRecycleBin(); // Reload data
+                    } else {
+                        alert('Lỗi: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Restore error:', error);
+                    alert('Lỗi khi khôi phục: ' + error.message);
+                });
+            }
+        }
+        
+        // Add permanent delete function
+        function permanentDelete(recycleBinId) {
+            if (confirm('CẢNH BÁO: Hành động này sẽ xóa vĩnh viễn dữ liệu và không thể khôi phục. Bạn có chắc chắn?')) {
+                fetch(`/api/recycle-bin/${recycleBinId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Đã xóa vĩnh viễn!');
+                        fixRecycleBin(); // Reload data
+                    } else {
+                        alert('Lỗi: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Delete error:', error);
+                    alert('Lỗi khi xóa: ' + error.message);
+                });
+            }
+        }
+        
+        // Function to restore normal spacing when leaving recycle bin
+        window.restoreContainerSpacing = function() {
+            const container = document.querySelector('.container-fluid.py-3.py-md-4');
+            if (container) {
+                container.style.paddingTop = '';
+                container.style.paddingBottom = '';
+                console.log('🔧 Container spacing restored to normal');
+            }
+        };
+        
+        // Make functions global
+        window.fixRecycleBin = fixRecycleBin;
+        window.restoreItem = restoreItem;
+        window.permanentDelete = permanentDelete;
+    </script>
+    <!-- Temporarily disabled to prevent 401 errors -->
+    <!-- <script src="js/test-user-selection.js"></script> -->
+    <script src="js/quick-fix.js"></script>
+</body>
+</html>

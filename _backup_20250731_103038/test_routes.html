@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Approve/Finalize Routes</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>Test Approve/Finalize Routes</h1>
+    
+    <div>
+        <h2>1. Check Session</h2>
+        <button onclick="checkSession()">Check Session</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div>
+        <h2>2. Test Approve Route</h2>
+        <button onclick="testApprove()">Test Approve Draft 21</button>
+        <div id="approveResult"></div>
+    </div>
+    
+    <div>
+        <h2>3. Test Finalize Route</h2>
+        <button onclick="testFinalize()">Test Finalize Draft 21</button>
+        <div id="finalizeResult"></div>
+    </div>
+
+    <script>
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/drafts/test-session');
+                const result = await response.json();
+                document.getElementById('sessionResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('sessionResult').innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testApprove() {
+            try {
+                const response = await fetch('/api/drafts/21/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                console.log('Approve response status:', response.status);
+                const result = await response.json();
+                document.getElementById('approveResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('approveResult').innerHTML = 'Error: ' + error.message;
+                console.error('Approve error:', error);
+            }
+        }
+        
+        async function testFinalize() {
+            try {
+                const response = await fetch('/api/drafts/21/finalize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                console.log('Finalize response status:', response.status);
+                const result = await response.json();
+                document.getElementById('finalizeResult').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('finalizeResult').innerHTML = 'Error: ' + error.message;
+                console.error('Finalize error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

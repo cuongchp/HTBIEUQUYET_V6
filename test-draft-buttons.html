@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Draft Buttons</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Test Draft Buttons</h2>
+        
+        <!-- Test Draft Table -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>Tiêu đề</th>
+                        <th class="text-center">Ngày tạo</th>
+                        <th class="text-center">Thời hạn góp ý</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="testDraftsTableBody">
+                    <!-- Test data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Load drafts module -->
+    <script src="js/modules/drafts.js"></script>
+    
+    <script>
+        // Test data
+        const testDrafts = [
+            {
+                DraftID: 1,
+                Title: "Dự thảo test 1",
+                CreatedDate: "2024-01-15T09:00:00.000Z",
+                CreatedBy: "admin",
+                CommentPeriod: 7,
+                Status: ""
+            },
+            {
+                DraftID: 2,
+                Title: "Dự thảo test 2",
+                CreatedDate: "2024-01-16T10:00:00.000Z",
+                CreatedBy: "manager",
+                CommentPeriod: 14,
+                Status: "Draft"
+            }
+        ];
+
+        // Mock functions for testing
+        function viewDraftDetails(draftId) {
+            alert('View draft: ' + draftId);
+        }
+
+        function editDraft(draftId) {
+            alert('Edit draft: ' + draftId);
+        }
+
+        function confirmDeleteDraft(draftId, title) {
+            if (confirm('Bạn có chắc chắn muốn xóa dự thảo "' + title + '"?')) {
+                alert('Delete draft: ' + draftId);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getStatusBadge(status) {
+            if (!status || status === 'Draft' || status === '') {
+                return '<span class="badge bg-success">Đang mở góp ý</span>';
+            }
+            return '<span class="badge bg-secondary">' + status + '</span>';
+        }
+
+        // Test display function
+        function testDisplayDrafts() {
+            const tableBody = document.getElementById('testDraftsTableBody');
+            
+            let tableHTML = '';
+            testDrafts.forEach((draft, index) => {
+                const createdDate = new Date(draft.CreatedDate).toLocaleDateString('vi-VN');
+                const deadlineDate = new Date(draft.CreatedDate);
+                deadlineDate.setDate(deadlineDate.getDate() + (draft.CommentPeriod || 7));
+                
+                const statusBadge = getStatusBadge(draft.Status);
+                
+                tableHTML += `
+                    <tr>
+                        <td class="text-center">${index + 1}</td>
+                        <td>
+                            <div>
+                                <strong>${escapeHtml(draft.Title)}</strong>
+                                <br><small class="text-muted">Tạo bởi: ${escapeHtml(draft.CreatedBy || 'N/A')}</small>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <small>${createdDate}</small>
+                        </td>
+                        <td class="text-center">
+                            <small>${draft.CommentPeriod || 7} ngày</small>
+                        </td>
+                        <td class="text-center">${statusBadge}</td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="viewDraftDetails(${draft.DraftID})" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="editDraft(${draft.DraftID})" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDeleteDraft(${draft.DraftID}, '${escapeHtml(draft.Title)}')" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = tableHTML;
+        }
+
+        // Load test data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Testing draft buttons...');
+            testDisplayDrafts();
+        });
+    </script>
+</body>
+</html>

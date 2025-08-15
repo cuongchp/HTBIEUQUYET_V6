@@ -1,0 +1,27 @@
+# Dependencies 
+node_modules/ 
+npm-debug.log* 
+ 
+# Environment files 
+.env 
+.env.local 
+ 
+# Upload files 
+uploads/* 
+!uploads/.gitkeep 
+!uploads/*/.gitkeep 
+ 
+# IDE 
+.vscode/ 
+.idea/ 
+ 
+# Backup folders 
+backup_*/ 
+ 
+# Logs 
+logs/ 
+*.log 
+ 
+# Test files 
+test_*.js 
+debug_*.js 

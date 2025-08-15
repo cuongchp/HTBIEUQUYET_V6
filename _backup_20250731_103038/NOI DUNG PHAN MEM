@@ -1,0 +1,188 @@
+I. LƯU ĐỒ THỰC HIỆN BIỂU QUYẾT:
+ 
+Diễn dãi chi tiết nội dung các bước:
+Bước 1: Dự thảo Tờ trình các nội dung lấy  ý kiến biểu quyết trực tuyến:
+- Bộ phận soạn thảo gửi đến với Thư ký Công ty bản dự thảo Tờ trình nội dung cần lấy ý kiến.  
+- Thư ký Công ty thực hiện thao tác đưa lên phần mềm để thành viên HĐQT xem xét và góp ý dự thảo
+Bước 2: Góp ý dự thảo Tờ trình nội dung lấy ý kiến biểu quyết trực tuyến
+- Các Thành viên HĐQT Công ty thực hiện góp ý kiến dự thảo tại Tờ trình nội dung cần lấy ý kiến (nếu có) bằng cách nhập nội dung góp ý trực tiếp trên phần mềm.
+- Sau thời gian quy định mặc định, hệ thống sẽ đóng góp ý để Thư ký công ty tổng hợp thông tin và gửi thông tin hiệu chỉnh tờ trình cho Bộ phận soạn thảo hiệu chỉnh lại tờ trình.
+Bước 3: Thực hiện hiệu chỉnh dự thảo Tờ trình nội dung biểu quyết theo các góp ý và ban hành tờ trình.
+- Bộ phận soạn thảo thực hiện hiệu chỉnh các ý kiến các nội dung các thành viên HĐQT góp ý (nếu có) theo thông tin tổng hợp từ Thư ký Công ty. 
+- Bộ phận soạn thảo trình TGĐ ký ban hành tờ trình.
+Bước 4: Gửi hồ sơ đến Thư ký Công ty 
+- Bộ phận soạn thảo gửi Tờ trình đã được TGĐ phê duyệt đến Thư ký Công ty thực hiện bước tiếp theo
+Bước 5: Tạo phiếu biểu quyết 
+Thư ký Công ty điền đầy đủ các thông tin: 
+- Số phiếu ……/202…./CHP-HĐQT
+- Tạo tên tiêu đề nội dung biểu quyết
+- Ghi nội dung chính lấy ý kiến biểu quyết trong hộp văn bản.
+- Lựa chọn Biểu quyết
+- Đính kèm file nội dung chi tiết (nếu cần).
+Bước 6: Thực hiện lựa chọn biểu quyết
+Người dùng chọn một trong các lựa chọn sau: 
+- Đồng ý: Chấp nhận nội dung mà không có ý kiến thêm.	
+- Không đồng ý: Không đồng ý với nội dung và ghi rõ lý do.
+- Ý kiến khác: Ghi thông tin ý kiến khác
+Bước 7: Người dùng gửi phiếu biểu quyết
+- Sau khi hoàn tất việc chọn ý kiến, người dùng gửi phiếu biểu quyết cho hệ thống đồng thời thực hiện ký số.
+- Khi người dùng ký số, hệ thống sẽ tự động tạo ra file pdf theo mẫu phiếu biểu quyết kèm lựa chọn của người biểu quyết và thực hiện ký số vào file. Hệ thống cho phép in phiếu biểu quyết để phục vụ công tác lưu trữ.
+Bước 8: Tổng hợp kết quả
+- Tổng hợp các phiếu biểu quyết của các TV HĐQT,  hệ thống tính toán tỷ lệ phần trăm của từng lựa chọn biểu quyết (Đồng ý, Không đồng ý, ý kiến khác) theo mẫu. Thực hiện hình thức ký số để xác nhận hoàn thành phiếu tổng hợp kết quả. (Thư ký Công ty và chủ tịch HĐQT).
+- Xuất được biên bản tổng hợp kết quả (theo mẫu)
+Bước 9: Hội đồng Quản trị ban hành Nghị quyết: 
+Hội đồng quản trị ra Nghị quyết biểu quyết thực hiện hình thức ký số như sau:
+- Thư ký Công ty biên soạn Nghị quyết
+- Thư ký Công ty trình văn bản lên phần mềm để trình chủ tịch HĐQT.
+- Chủ tịch hội đồng quản trị thực hiện ký số trên phần mềm.
+Bước 10: Kết thúc biểu quyết: 
+- Thư ký Công ty hoàn thiện hồ sơ và `kết thúc công tác biểu quyết tại phần mềm.
+ 
+II. DỰ KIẾN CẤU TRÚC VÀ CÁC CHỨC NĂNG PHẦN MỀM:
+1. Tổng quan hệ thống
+•	Mục đích: Cung cấp một nền tảng số để tạo, quản lý và tham gia vào các cuộc biểu quyết nội bộ một cách hiệu quả và minh bạch.
+•	Đối tượng người dùng:
+o	Admin (Quản trị viên): Có toàn quyền quản lý hệ thống, bao gồm quản lý người dùng, quản lý phiếu biểu quyết, phân quyền, và các chức năng khác.
+o	User (Người dùng): Có thể tham gia biểu quyết các phiếu được chỉ định, xem lịch sử biểu quyết và tài liệu.
+•	Công nghệ chính: HTML, CSS, JavaScript, Bootstrap 5, Chart.js (để vẽ biểu đồ)…..
+•	Công nghệ chữ ký số: Dùng ký ứng dụng MySign thông qua nhà cung cấp dịch vụ.
+•	Database sử dụng SQL Server để thực hiện nơi lưu trữ dữ liệu dự án. Toàn bộ dữ liệu demon, dữ liệu tạo trong dự án phải được tạo từ SQL server.
+2. Cấu trúc giao diện chính
+Hệ thống bao gồm hai giao diện chính:
+a. Trang Đăng nhập
+•	Yêu cầu người dùng nhập Tên đăng nhập và Mật khẩu.
+•	Hiển thị thông báo lỗi nếu đăng nhập không thành công.
+ 
+b. Trang Dashboard - Sau khi đăng nhập thành công
+•	Tiêu đề chính:
+o	Hiển thị tên hệ thống ("HỆ THỐNG BIỂU QUYẾT - EVNCHP"), liên kết về trang chủ dashboard.
+o	Hiển thị tên người dùng đang đăng nhập, cho phép xem thông tin tài khoản (chưa triển khai chi tiết) và Đăng xuất.
+•	Thanh điều hướng các chức năng chính:
+o	Nằm ngay dưới header chính, chứa các liên kết nhanh đến các module chức năng của hệ thống.
+o	Các mục menu hiển thị tùy thuộc vào quyền của người dùng.
+•	Khu vực nội dung Module:
+o	Phần trung tâm, nơi nội dung của module được chọn sẽ hiển thị.
+3. Chi tiết các Module
+a. Trang chủ 
+•	Chức năng:
+o	Cung cấp thống kê nhanh:
+	Số lượng "Phiếu đang chờ biểu quyết".
+	Số lượng "Phiếu đã hoàn thành trong năm hiện tại".
+o	Các thẻ thống kê này có thể nhấp vào để điều hướng nhanh đến module "Biểu quyết" hoặc "Lịch sử BQ".
+•	Truy cập: Module mặc định sau khi người dùng đăng nhập thành công, hoặc khi nhấp vào logo/tên hệ thống, hoặc qua mục menu "Trang chủ".
+ 
+b. Dự thảo tờ trình:
+•	Chức năng: 
+o	Tạo dự thảo tờ trình (được phân quyền cho Thư ký Công ty)
+o	Đính kèm nội dung dự thảo tờ trình.
+o	Tại giao diện có 2 nút “Thống nhất dự thảo” và “Góp ý dự thảo”
+o	Click vào góp ý dự thảo có khung điền nội dung góp ý dự thảo tờ trình (nếu có)
+o	Cho phép hiển thị các nội dung góp ý, bổ sung dự thảo để hoàn thiện nội dung tờ trình của các thành viên tham gia biểu quyết.
+o	Thời gian góp ý dự thảo có thể điều chỉnh theo nhu cầu người dùng.
+ 
+
+ 
+ 
+c. Tạo phiếu 
+•	Chức năng:
+o	Dành cho người dùng có quyền (thường là Admin và user được phân quyền).
+o	Cho phép tạo một phiếu biểu quyết mới với các thông tin:
+	Số phiếu (người dùng điền số và tự động thêm hậu tố năm và đơn vị ví dụ: 01/2025/CHP-HĐQT).
+	Tiêu đề biểu quyết (bắt buộc).
+	Tóm tắt nội dung biểu quyết (bắt buộc).
+	Đính kèm tài liệu (cho phép chọn nhiều file, giới hạn dung lượng mỗi file đính kèm không lớn hơn 300Mb).
+	Chỉ định người tham gia biểu quyết:
+	Có thể chọn "Tất cả Người dùng (trừ Admin)".
+	Hoặc chọn từng người dùng cụ thể từ danh sách.
+o	Sau khi tạo thành công, phiếu sẽ được thêm vào danh sách “Phiếu đang chờ biểu quyết”.
+•	Truy cập: Qua mục menu "Tạo phiếu" trên thanh điều hướng module.
+ 
+d. Biểu quyết
+•	Danh sách Phiếu Biểu Quyết:
+o	Chức năng:
+	Hiển thị danh sách các phiếu biểu quyết đang chờ biểu quyết ở trạng thái "Mở".
+	Đối với Admin: Hiển thị tất cả các phiếu đang mở.
+	Đối với User thường: Chỉ hiển thị các phiếu mà họ được chỉ định (trực tiếp hoặc qua nhóm "Tất cả") và user chưa thực hiện biểu quyết cho phiếu đó.
+	Mỗi mục trong danh sách hiển thị tiêu đề, số phiếu, nội dung tóm tắt (các là nội dung chính), người tạo, ngày tạo.
+o	Truy cập: Qua mục menu "Biểu quyết"
+ 
+•	Chi Tiết Phiếu Biểu Quyết:
+o	Chức năng:
+	Hiển thị thông tin chi tiết của một phiếu được chọn từ Danh sách phiếu biểu quyết, bao gồm: tiêu đề, số phiếu, nội dung, danh sách file đính kèm (nếu có).
+	Đối với User được chỉ định và chưa biểu quyết: Hiển thị form để thực hiện biểu quyết:
+	Đồng ý.
+	Không đồng ý (yêu cầu nhập lý do).
+	Ý kiến khác (yêu cầu nhập nội dung ý kiến).
+	Đối với User đã biểu quyết: Hiển thị thông báo về lựa chọn và thời gian đã biểu quyết.
+	Đối với Admin: Hiển thị thông báo Admin có thể xem chi tiết nhưng không tham gia biểu quyết.
+	Nút "Xuất kết quả biểu quyết" hiển thị cho Admin hoặc khi phiếu đã đóng  thì cho phép các user người dùng thấy hiển thị ở phần “Lịch sử BQ).
+	Nút “Gửi phiếu biểu quyết” được thực hiện thông qua ký số của các User.
+o	Truy cập: Khi nhấp vào một phiếu trong danh sách phiếu biểu quyết.
+ 
+ 
+Sau khi biểu quyết và ký số, người biểu quyết có thể xem lại file Phiếu biểu quyết.
+e. Kết thúc BQ:
+•	Chức năng: (Dành cho Admin và user được phân quyền)
+o	Giao diện danh sách:
+	Hiển thị bảng liệt kê các phiếu đang ở trạng thái "Mở".
+	Thông tin bao gồm: tiêu đề, ngày tạo, tỷ lệ người đã biểu quyết / tổng số người được chỉ định.
+	Nút "Xem chi tiết & Kết thúc" cho mỗi phiếu.
+o	Giao diện chi tiết: (Hiển thị khi chọn một phiếu từ danh sách)
+	Hiển thị tiêu đề và số phiếu.
+	Danh sách "Đã biểu quyết": Tên người dùng và lựa chọn/lý do của người biểu quyết và đính  kèm phiếu biểu quyết thông qua ký số ở trên, hệ thống sẽ tự động tạo phiếu biểu quyết (theo mẫu) và được ký số.
+	Danh sách "Chưa biểu quyết": Tên người dùng được chỉ định nhưng chưa bỏ phiếu.
+	Nút tạo “Phiếu tổng hợp lấy ý kiến”. Hệ thống căn cứ vào dữ liệu biểu quyết của các user vào sẽ xuất hiện form phiếu tổng hợp (theo mẫu) để người dùng điền các thông tin và tạo thành dữ liệu mới tại trang chính để Chủ tịch HĐQT và thư ký thực hiện ký số. Nút tổng hợp phiếu biểu quyết chỉ được kích hoạt khi các thành viên hoàn thành biểu quyết.
+ 
+	Nút tạo “Ban hành Nghị quyết”: được kích hoạt sau khi “Phiếu tổng hợp lấy ý kiến” hoàn thành phần ký số. Khi bấm nút tạo” Ban hành Nghị quyết” Hệ thống sẽ thực hiện hiển thị Form và các thông tin để thực hiện ký số bao gồm: 
+-	Người dùng đính kèm File Nghị quyết đính kèm để ký số.
+-	Các file dữ liệu của 1 đợt lấy biểu quyết lấy từ hệ thống sang bao gồm: Tờ trình, các phiếu biểu quyết
+	Sau khi hoàn thiện các bước đính kèm sẽ thực hiện bấm nút “Trình ký”. Lúc này hệ thống sẽ tạo ra danh mục ký số theo chức năng của user Chủ tịch HĐQT.
+	 
+	Nút "Kết thúc Biểu quyết này":
+-	Chỉ được kích hoạt khi tất cả người dùng đã thực hiện biểu quyết và thực hiện thao tác hoàn thành thao tác tạo biên bản tổng hợp kết quả. 
+-	Chỉ được kích hoạt khi hoàn thành các công tác ký số phiếu tổng hợp lấy ý kiến và nghị quyết.
+-	Khi kết thúc, phiếu sẽ được chuyển trạng thái sang "Đóng", cập nhật các danh sách liên quan (Trang chính, Lịch sử BQ, danh sách phiếu đang mở), và người dùng được đưa trở lại giao diện danh sách của module "Trang chủ".
+•	Truy cập: Qua mục menu "Kết thúc BQ".
+ 
+ 
+f. Lịch sử BQ
+•	Chức năng:
+o	Hiển thị danh sách các phiếu đã ở trạng thái "Đóng", được nhóm theo năm.
+o	Mỗi phiếu trong lịch sử cho phép xem chi tiết kết quả khi nhấp vào.
+o	Modal Chi tiết Lịch sử:
+	Hiển thị tiêu đề, số phiếu.
+	Biểu đồ tròn thể hiện tỷ lệ các lựa chọn (Đồng ý, Không đồng ý, Ý kiến khác).
+	Kết luận sơ bộ dựa trên tỷ lệ.
+	Danh sách chi tiết người biểu quyết, lựa chọn và lý do/ý kiến của họ.
+	Danh sách file đính kèm gốc của phiếu và các file kết quả được tạo tự động
+•	Truy cập: Qua mục menu "Lịch sử BQ".
+ 
+ 
+g. Tủ tài liệu 
+•	Chức năng:
+o	Hiển thị danh sách các tài liệu đã được tải lên hệ thống, nhóm theo năm.
+o	Mỗi tài liệu hiển thị tên, ngày tải lên, người tải lên, kích thước.
+o	Cho phép tải xuống
+o	Đối với Admin: Có thêm nút "Tải lên tài liệu mới" (mở modal để chọn file và năm lưu trữ) và nút xóa tài liệu.
+•	Truy cập: Qua mục menu "Tủ tài liệu".
+h. Ký số các văn bản :
+•	Chức năng:
+o	Tap ký số văn bản: Tạo văn bản ký số
+o	Trình ký số
+o	Thực hiện ký số
+k. Quản trị
+•	Chức năng: (Dành riêng cho Admin)
+o	Tab "Quản lý người dùng":
+	Hiển thị danh sách tất cả người dùng (ID, Tên đăng nhập, Vai trò).
+	Nút "Thêm người dùng mới": Mở modal để tạo tài khoản người dùng mới (nhập tên, mật khẩu, chọn vai trò User/Admin). Quyền mặc định sẽ được gán dựa trên vai trò.
+	Cho phép xóa người dùng (trừ tài khoản "admin"). Khi xóa, người dùng đó cũng sẽ bị loại bỏ khỏi danh sách assignees và results của các phiếu biểu quyết.
+o	Tab "Quản lý biểu quyết":
+	Hiển thị danh sách tất cả các phiếu biểu quyết trong hệ thống (ID, Tiêu đề, Trạng thái).
+	Cho phép xóa các phiếu đang ở trạng thái "Mở".
+o	Tab "Quản trị phân quyền":
+	Hiển thị bảng ma trận phân quyền: danh sách người dùng (trừ "admin") và các quyền truy cập module (Tạo phiếu, Biểu quyết, Kết thúc BQ, Lịch sử BQ, Tủ tài liệu, Quản trị).
+	Admin có thể tick/un-tick các checkbox để thay đổi quyền.
+	Nút "Lưu thay đổi phân quyền" để áp dụng các thay đổi.
+•	Truy cập: Qua mục menu "Quản trị".
+ 
+

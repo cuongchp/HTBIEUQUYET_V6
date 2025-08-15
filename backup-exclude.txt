@@ -1,0 +1,14 @@
+node_modules\
+.git\
+backup_*\
+*.log
+logs\
+temp\
+tmp\
+.vscode\
+.idea\
+*.tmp
+*.temp
+Thumbs.db
+desktop.ini
+.DS_Store

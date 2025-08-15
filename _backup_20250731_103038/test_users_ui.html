@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Load Users</title>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-4">
+    <h2>Test Load Users Function</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Login First</h4>
+            <div class="mb-3">
+                <input type="text" id="username" class="form-control" placeholder="Username" value="admin">
+            </div>
+            <div class="mb-3">
+                <input type="password" id="password" class="form-control" placeholder="Password" value="admin123">
+            </div>
+            <button class="btn btn-primary" onclick="testLogin()">Login</button>
+        </div>
+        
+        <div class="col-md-6">
+            <h4>Test Users API</h4>
+            <button class="btn btn-success" onclick="testLoadUsers()">Load Users</button>
+            <button class="btn btn-info" onclick="clearResults()">Clear</button>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <h4>Results</h4>
+        <div id="results" class="alert alert-info">
+            Click buttons above to test...
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <h4>Users Table</h4>
+        <div id="usersTable">
+            <!-- Users will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Global variables
+let currentUser = null;
+
+// Format date function
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+}
+
+// Test login
+async function testLogin() {
+    try {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        
+        document.getElementById('results').innerHTML = 'Logging in...';
+        
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentUser = data.user;
+            document.getElementById('results').innerHTML = `
+                <div class="alert alert-success">
+                    ✅ Login successful!<br>
+                    User: ${data.user.FullName} (${data.user.Role})
+                </div>
+            `;
+        } else {
+            document.getElementById('results').innerHTML = `
+                <div class="alert alert-danger">
+                    ❌ Login failed: ${data.error}
+                </div>
+            `;
+        }
+    } catch (error) {
+        document.getElementById('results').innerHTML = `
+            <div class="alert alert-danger">
+                ❌ Error: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Test load users
+async function testLoadUsers() {
+    try {
+        document.getElementById('results').innerHTML = 'Loading users...';
+        
+        const response = await fetch('/api/admin/users');
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`HTTP ${response.status}: ${errorData.error || 'Unknown error'}`);
+        }
+        
+        const users = await response.json();
+        
+        // Validate that users is an array
+        if (!Array.isArray(users)) {
+            throw new Error('Invalid data format: expected array');
+        }
+        
+        // Update results
+        document.getElementById('results').innerHTML = `
+            <div class="alert alert-success">
+                ✅ Users loaded successfully!<br>
+                Found ${users.length} users
+            </div>
+        `;
+        
+        // Update table
+        const usersTableDiv = document.getElementById('usersTable');
+        
+        let tableHTML = `
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Họ tên</th>
+                            <th>Vai trò</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        if (users.length === 0) {
+            tableHTML += `
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        <i class="fas fa-users"></i> Chưa có người dùng nào
+                    </td>
+                </tr>
+            `;
+        } else {
+            users.forEach(user => {
+                tableHTML += `
+                    <tr>
+                        <td>${user.UserID || 'N/A'}</td>
+                        <td>${user.Username || 'N/A'}</td>
+                        <td>${user.FullName || 'N/A'}</td>
+                        <td><span class="badge ${user.Role === 'Admin' ? 'bg-primary' : 'bg-secondary'}">${user.Role || 'User'}</span></td>
+                        <td>${user.CreatedDate ? formatDate(user.CreatedDate) : 'N/A'}</td>
+                        <td><span class="badge ${user.IsActive ? 'bg-success' : 'bg-danger'}">${user.IsActive ? 'Hoạt động' : 'Vô hiệu'}</span></td>
+                    </tr>
+                `;
+            });
+        }
+        
+        tableHTML += '</tbody></table></div>';
+        usersTableDiv.innerHTML = tableHTML;
+        
+    } catch (error) {
+        document.getElementById('results').innerHTML = `
+            <div class="alert alert-danger">
+                ❌ Error loading users: ${error.message}
+            </div>
+        `;
+        
+        document.getElementById('usersTable').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Lỗi tải danh sách người dùng: ${error.message}
+            </div>
+        `;
+    }
+}
+
+// Clear results
+function clearResults() {
+    document.getElementById('results').innerHTML = 'Results cleared.';
+    document.getElementById('usersTable').innerHTML = '';
+}
+</script>
+</body>
+</html>

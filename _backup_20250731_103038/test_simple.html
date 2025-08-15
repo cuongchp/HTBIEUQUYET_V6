@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Hệ thống Biểu quyết - EVNCHP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div class="card shadow-lg" style="max-width: 400px; width: 100%;">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-vote-yea me-2"></i>
+                    HỆ THỐNG BIỂU QUYẾT EVNCHP
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Tên đăng nhập</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mật khẩu</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                    </button>
+                </form>
+                <div id="loginError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="d-none">
+        <!-- Header -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#" onclick="showModule('dashboard')">
+                    <i class="fas fa-vote-yea me-2"></i>
+                    HỆ THỐNG BIỂU QUYẾT EVNCHP
+                </a>
+                
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Navigation Menu -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="mainNavigation">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainMenu">
+                        <!-- Menu will be populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="container-fluid py-4">
+            <div id="contentArea">
+                <!-- Dashboard Module -->
+                <div id="dashboard" class="module-content">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-home me-2"></i>Trang chủ
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-clock fa-2x text-warning mb-3"></i>
+                                    <h5>Phiếu đang mở</h5>
+                                    <h2 class="text-primary" id="pendingVotesCount">5</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fa-2x text-success mb-3"></i>
+                                    <h5>Phiếu đã hoàn thành</h5>
+                                    <h2 class="text-success" id="completedVotesCount">2</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-comment-dots fa-2x text-info mb-3"></i>
+                                    <h5>Góp ý dự thảo</h5>
+                                    <h2 class="text-info">0</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Draft Management Module -->
+                <div id="draftManagement" class="module-content d-none">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-file-alt me-2"></i>Dự Thảo Tờ Trình
+                    </h3>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Danh sách dự thảo</h5>
+                            <div id="draftsList">
+                                <p>Đang tải danh sách dự thảo...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vote Module -->
+                <div id="vote" class="module-content d-none">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-vote-yea me-2"></i>Tham gia Biểu quyết
+                    </h3>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Phiếu biểu quyết đang mở</h5>
+                            <div id="votesList">
+                                <p>Đang tải danh sách phiếu biểu quyết...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Module -->
+                <div id="admin" class="module-content d-none">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-users-cog me-2"></i>Quản trị Người dùng
+                    </h3>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Quản lý người dùng</h5>
+                            <p>Module quản trị người dùng</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other modules can be added here -->
+                <div id="createVote" class="module-content d-none">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-plus-circle me-2"></i>Tạo Phiếu Biểu quyết
+                    </h3>
+                    <p>Module tạo phiếu biểu quyết</p>
+                </div>
+
+                <div id="endVote" class="module-content d-none">
+                    <h3 class="text-primary mb-4">
+                        <i class="fas fa-chart-bar me-2"></i>Kết quả Biểu quyết
+                    </h3>
+                    <p>Module kết quả biểu quyết</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentUser = null;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            initializeEventListeners();
+        });
+
+        // Check if user is already logged in
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/user');
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    showMainApp();
+                } else {
+                    showLoginPage();
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                showLoginPage();
+            }
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentUser = data.user;
+                    showMainApp();
+                } else {
+                    showError(errorDiv, data.error || 'Đăng nhập thất bại');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError(errorDiv, 'Lỗi kết nối');
+            }
+        }
+
+        // Show error message
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('d-none');
+        }
+
+        // Show login page
+        function showLoginPage() {
+            document.getElementById('loginPage').classList.remove('d-none');
+            document.getElementById('mainApp').classList.add('d-none');
+        }
+
+        // Show main application
+        function showMainApp() {
+            document.getElementById('loginPage').classList.add('d-none');
+            document.getElementById('mainApp').classList.remove('d-none');
+            
+            // Update user info
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.FullName || currentUser.Username;
+            }
+            
+            // Build menu
+            buildMenu();
+            
+            // Show dashboard
+            showModule('dashboard');
+        }
+
+        // Build menu
+        function buildMenu() {
+            const menu = document.getElementById('mainMenu');
+            const menuItems = [
+                { id: 'dashboard', name: 'Trang chủ', icon: 'fas fa-home' },
+                { id: 'draftManagement', name: 'Dự thảo tờ trình', icon: 'fas fa-file-alt' },
+                { id: 'createVote', name: 'Tạo phiếu biểu quyết', icon: 'fas fa-plus-circle', adminOnly: true },
+                { id: 'vote', name: 'Tham gia biểu quyết', icon: 'fas fa-vote-yea' },
+                { id: 'endVote', name: 'Kết quả biểu quyết', icon: 'fas fa-chart-bar' },
+                { id: 'admin', name: 'Quản trị người dùng', icon: 'fas fa-users-cog', adminOnly: true }
+            ];
+            
+            // Clear menu
+            menu.innerHTML = '';
+            
+            console.log('Building menu for user:', currentUser);
+            
+            // Filter menu items
+            const visibleItems = menuItems.filter(item => {
+                if (item.adminOnly && currentUser.Role !== 'Admin') {
+                    return false;
+                }
+                return true;
+            });
+            
+            // Create menu items
+            visibleItems.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                
+                li.innerHTML = `
+                    <a class="nav-link" href="#" data-module="${item.id}" onclick="showModule('${item.id}')">
+                        <i class="${item.icon} me-2"></i>${item.name}
+                    </a>
+                `;
+                menu.appendChild(li);
+            });
+        }
+
+        // Show module
+        function showModule(moduleId) {
+            // Remove active class from all menu items
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current menu item
+            const activeLink = document.querySelector(`[data-module="${moduleId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.classList.add('d-none');
+            });
+            
+            // Show selected module
+            const selectedModule = document.getElementById(moduleId);
+            if (selectedModule) {
+                selectedModule.classList.remove('d-none');
+                
+                // Load module data
+                loadModuleData(moduleId);
+            }
+        }
+
+        // Load module data
+        function loadModuleData(moduleId) {
+            switch(moduleId) {
+                case 'dashboard':
+                    loadDashboardStats();
+                    break;
+                case 'draftManagement':
+                    loadDrafts();
+                    break;
+                case 'vote':
+                    loadVotes();
+                    break;
+                // Add other cases as needed
+            }
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('pendingVotesCount').textContent = stats.openVotes || 0;
+                    document.getElementById('completedVotesCount').textContent = stats.closedVotesThisYear || 0;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        // Load drafts
+        async function loadDrafts() {
+            const draftsList = document.getElementById('draftsList');
+            try {
+                const response = await fetch('/api/drafts');
+                if (response.ok) {
+                    const drafts = await response.json();
+                    
+                    if (drafts.length === 0) {
+                        draftsList.innerHTML = '<p class="text-muted">Không có dự thảo nào</p>';
+                        return;
+                    }
+                    
+                    let html = '<div class="list-group">';
+                    drafts.forEach(draft => {
+                        html += `
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">${draft.Title}</h5>
+                                    <small>${new Date(draft.CreatedDate).toLocaleDateString('vi-VN')}</small>
+                                </div>
+                                <p class="mb-1">${draft.Content ? draft.Content.substring(0, 100) + '...' : ''}</p>
+                                <small>Tạo bởi: ${draft.CreatedBy}</small>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewDraftDetails(${draft.DraftID})">
+                                        <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    draftsList.innerHTML = html;
+                } else {
+                    draftsList.innerHTML = '<p class="text-danger">Lỗi tải danh sách dự thảo</p>';
+                }
+            } catch (error) {
+                console.error('Error loading drafts:', error);
+                draftsList.innerHTML = '<p class="text-danger">Lỗi kết nối</p>';
+            }
+        }
+
+        // View draft details
+        async function viewDraftDetails(draftId) {
+            try {
+                console.log('Loading draft details for ID:', draftId);
+                const response = await fetch(`/api/drafts/${draftId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Draft details loaded:', data);
+                    
+                    alert(`Chi tiết dự thảo: ${data.draft.Title}\n\nNội dung: ${data.draft.Content}\n\nSố bình luận: ${data.comments.length}`);
+                } else {
+                    const error = await response.json();
+                    console.error('Error response:', error);
+                    alert('Lỗi tải chi tiết dự thảo: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error loading draft details:', error);
+                alert('Lỗi kết nối khi tải chi tiết dự thảo');
+            }
+        }
+
+        // Load votes
+        async function loadVotes() {
+            const votesList = document.getElementById('votesList');
+            votesList.innerHTML = '<p>Đang tải danh sách phiếu biểu quyết...</p>';
+            
+            // Placeholder for votes loading
+            setTimeout(() => {
+                votesList.innerHTML = '<p class="text-muted">Chưa có phiếu biểu quyết nào đang mở</p>';
+            }, 1000);
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                currentUser = null;
+                showLoginPage();
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
